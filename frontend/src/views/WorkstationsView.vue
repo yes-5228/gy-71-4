@@ -1,12 +1,18 @@
 <template>
   <section class="panel">
     <SectionToolbar eyebrow="Workstations" title="工位管理">
-      <select v-model="statusFilter" @change="load">
-        <option value="">全部状态</option>
-        <option value="available">可租</option>
-        <option value="leased">已租</option>
-        <option value="maintenance">维护</option>
-      </select>
+      <div class="filter-bar">
+        <select v-model="statusFilter" @change="onFilterChange">
+          <option value="">全部状态</option>
+          <option value="available">可租</option>
+          <option value="leased">已租</option>
+          <option value="maintenance">维护</option>
+        </select>
+        <select v-model="areaFilter" @change="onFilterChange">
+          <option value="">全部区域</option>
+          <option v-for="a in areaOptions" :key="a" :value="a">{{ a }}</option>
+        </select>
+      </div>
     </SectionToolbar>
 
     <form class="form-grid" @submit.prevent="submit">
@@ -31,6 +37,7 @@
             <th>月租金</th>
             <th>状态</th>
             <th>配套</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -42,6 +49,14 @@
             <td>{{ currency(item.monthly_rent) }}</td>
             <td><StatusBadge :value="item.status" /></td>
             <td>{{ item.facilities || '-' }}</td>
+            <td>
+              <button
+                v-if="item.status === 'available'"
+                type="button"
+                class="small-button"
+                @click="goContract(item.id)"
+              >签约</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -55,8 +70,14 @@ import { createWorkstation, fetchWorkstations } from '../api/workstations'
 import SectionToolbar from '../components/SectionToolbar.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import { currency } from '../utils/formatters'
+import { useWorkstationContext } from '../utils/workspaceContext'
 
-const statusFilter = ref('')
+const emit = defineEmits(['navigate'])
+
+const { ctx, setFilters, selectForContract, consumeRefresh } = useWorkstationContext()
+
+const statusFilter = ref(ctx.statusFilter)
+const areaFilter = ref(ctx.areaFilter)
 const workstations = ref([])
 const error = ref('')
 const form = reactive({
@@ -69,13 +90,41 @@ const form = reactive({
   facilities: ''
 })
 
+const areaOptions = ref([])
+
+function extractAreas(list) {
+  const seen = new Set()
+  for (const ws of list) {
+    if (ws.area) seen.add(ws.area)
+  }
+  areaOptions.value = [...seen].sort()
+}
+
 async function load() {
   error.value = ''
   try {
-    workstations.value = await fetchWorkstations(statusFilter.value)
+    const data = await fetchWorkstations(statusFilter.value, areaFilter.value)
+    workstations.value = data
+    if (!areaFilter.value) {
+      const all = await fetchWorkstations(statusFilter.value, '')
+      extractAreas(all)
+    } else {
+      extractAreas(data)
+    }
   } catch (err) {
     error.value = err.message
   }
+}
+
+function onFilterChange() {
+  setFilters(statusFilter.value, areaFilter.value)
+  load()
+}
+
+function goContract(workstationId) {
+  setFilters(statusFilter.value, areaFilter.value)
+  selectForContract(workstationId)
+  emit('navigate', 'contracts')
 }
 
 async function submit() {
@@ -89,5 +138,11 @@ async function submit() {
   }
 }
 
-onMounted(load)
+onMounted(() => {
+  if (consumeRefresh()) {
+    load()
+  } else {
+    load()
+  }
+})
 </script>

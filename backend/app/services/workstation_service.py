@@ -5,10 +5,12 @@ from app.models.workstation import Workstation
 from app.schemas.workstation import WorkstationCreate, WorkstationUpdate
 
 
-def list_workstations(db: Session, status: str | None = None) -> list[Workstation]:
+def list_workstations(db: Session, status: str | None = None, area: str | None = None) -> list[Workstation]:
     stmt = select(Workstation).order_by(Workstation.area, Workstation.code)
     if status:
         stmt = stmt.where(Workstation.status == status)
+    if area:
+        stmt = stmt.where(Workstation.area == area)
     return list(db.scalars(stmt).all())
 
 

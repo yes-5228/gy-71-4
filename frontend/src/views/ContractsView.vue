@@ -62,6 +62,9 @@ import { fetchWorkstations } from '../api/workstations'
 import SectionToolbar from '../components/SectionToolbar.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import { currency, todayISO } from '../utils/formatters'
+import { useWorkstationContext } from '../utils/workspaceContext'
+
+const { ctx, clearSelection, markNeedsRefresh } = useWorkstationContext()
 
 const contracts = ref([])
 const availableWorkstations = ref([])
@@ -113,6 +116,8 @@ async function submit() {
   error.value = ''
   try {
     await createContract({ ...form, workstation_id: Number(form.workstation_id) })
+    markNeedsRefresh()
+    clearSelection()
     Object.assign(form, {
       tenant_name: '',
       tenant_contact: '',
@@ -128,5 +133,16 @@ async function submit() {
   }
 }
 
-onMounted(load)
+onMounted(async () => {
+  await load()
+  if (ctx.selectedWorkstationId) {
+    const exists = availableWorkstations.value.some(
+      (ws) => ws.id === ctx.selectedWorkstationId
+    )
+    if (exists) {
+      form.workstation_id = ctx.selectedWorkstationId
+    }
+    clearSelection()
+  }
+})
 </script>

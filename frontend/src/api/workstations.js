@@ -1,8 +1,11 @@
 import { request } from './http'
 
-export function fetchWorkstations(status = '') {
-  const query = status ? `?status=${encodeURIComponent(status)}` : ''
-  return request(`/workstations${query}`)
+export function fetchWorkstations(status = '', area = '') {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  if (area) params.set('area', area)
+  const query = params.toString()
+  return request(`/workstations${query ? '?' + query : ''}`)
 }
 
 export function createWorkstation(payload) {

@@ -10,8 +10,8 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[WorkstationRead])
-def read_workstations(status: str | None = None, db: Session = Depends(get_db)):
-    return list_workstations(db, status=status)
+def read_workstations(status: str | None = None, area: str | None = None, db: Session = Depends(get_db)):
+    return list_workstations(db, status=status, area=area)
 
 
 @router.post("", response_model=WorkstationRead, status_code=status.HTTP_201_CREATED)

@@ -257,6 +257,33 @@ td small {
   padding: 10px 12px;
 }
 
+.filter-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-bar select {
+  border: 1px solid #c7d1dc;
+  border-radius: 6px;
+  min-height: 40px;
+  padding: 8px 10px;
+  width: auto;
+}
+
+.small-button {
+  background: #1d5f8f;
+  border-color: #1d5f8f;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  min-height: 30px;
+  padding: 4px 12px;
+}
+
+.small-button:hover {
+  background: #174d77;
+}
+
 @media (max-width: 720px) {
   .app-header,
   .section-toolbar {
