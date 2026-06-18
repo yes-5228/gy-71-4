@@ -285,7 +285,7 @@ td small {
 }
 
 .notice {
-  align-items: center;
+  align-items: flex-start;
   border: 1px solid #b8e0c2;
   border-radius: 6px;
   display: flex;
@@ -293,6 +293,13 @@ td small {
   justify-content: space-between;
   margin-bottom: 14px;
   padding: 10px 14px;
+}
+
+.notice-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .notice-success {
@@ -303,6 +310,25 @@ td small {
 
 .notice strong {
   color: #1b6b35;
+}
+
+.notice-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.notice-link {
+  background: transparent;
+  border: none;
+  color: #1d5f8f;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.notice-link:hover {
+  color: #174d77;
 }
 
 .notice-close {

@@ -26,14 +26,24 @@
     </form>
 
     <div v-if="successNotice" class="notice notice-success" role="alert">
-      <span>
-        🎉 工位 <strong>{{ successNotice.code || '#' + successNotice.id }}</strong>
-        <template v-if="successNotice.area">（{{ successNotice.area }}）</template>
-        已成功签约。
-        <template v-if="successNotice.outOfFilter">
-          由于工位状态已变更为"已租"，当前筛选条件下不再显示该工位。
-        </template>
-      </span>
+      <div class="notice-body">
+        <span>
+          🎉 工位 <strong>{{ successNotice.code || '#' + successNotice.id }}</strong>
+          <template v-if="successNotice.area">（{{ successNotice.area }}）</template>
+          已成功签约。
+          <template v-if="successNotice.outOfFilter">
+            由于工位状态已变更为"已租"，当前筛选条件下不再显示该工位。
+          </template>
+        </span>
+        <div class="notice-actions">
+          <button type="button" class="notice-link" @click="switchToLeased">
+            查看已租工位
+          </button>
+          <button type="button" class="notice-link" @click="switchToAll">
+            查看全部工位
+          </button>
+        </div>
+      </div>
       <button type="button" class="notice-close" @click="successNotice = null">×</button>
     </div>
 
@@ -86,7 +96,7 @@ import { useWorkstationContext } from '../utils/workspaceContext'
 
 const emit = defineEmits(['navigate'])
 
-const { ctx, setFilters, selectForContract, consumeRefresh, consumeLastSigned } = useWorkstationContext()
+const { ctx, setFilters, selectForContract, consumeWorkstationsRefresh, consumeLastSigned } = useWorkstationContext()
 
 const statusFilter = ref(ctx.statusFilter)
 const areaFilter = ref(ctx.areaFilter)
@@ -135,6 +145,18 @@ function onFilterChange() {
   load()
 }
 
+function switchToLeased() {
+  statusFilter.value = 'leased'
+  setFilters(statusFilter.value, areaFilter.value)
+  load()
+}
+
+function switchToAll() {
+  statusFilter.value = ''
+  setFilters(statusFilter.value, areaFilter.value)
+  load()
+}
+
 function goContract(workstationId) {
   setFilters(statusFilter.value, areaFilter.value)
   selectForContract(workstationId)
@@ -154,7 +176,7 @@ async function submit() {
 
 onMounted(async () => {
   const lastSigned = consumeLastSigned()
-  const shouldRefresh = consumeRefresh()
+  const shouldRefresh = consumeWorkstationsRefresh()
   await load()
   if (lastSigned) {
     const stillVisible = workstations.value.some((ws) => ws.id === lastSigned.id)

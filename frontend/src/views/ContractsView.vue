@@ -64,7 +64,7 @@ import StatusBadge from '../components/StatusBadge.vue'
 import { currency, todayISO } from '../utils/formatters'
 import { useWorkstationContext } from '../utils/workspaceContext'
 
-const { ctx, clearSelection, markNeedsRefresh, setLastSignedWorkstation } = useWorkstationContext()
+const { ctx, clearSelection, markWorkstationsNeedRefresh, markContractsNeedRefresh, setLastSignedWorkstation, consumeContractsRefresh } = useWorkstationContext()
 
 const emit = defineEmits(['navigate'])
 
@@ -120,7 +120,8 @@ async function submit() {
     const signedId = Number(form.workstation_id)
     const signedItem = availableWorkstations.value.find((ws) => ws.id === signedId)
     await createContract({ ...form, workstation_id: signedId })
-    markNeedsRefresh()
+    markWorkstationsNeedRefresh()
+    markContractsNeedRefresh()
     clearSelection()
     if (signedItem) {
       setLastSignedWorkstation({ id: signedItem.id, code: signedItem.code, area: signedItem.area })
@@ -143,6 +144,7 @@ async function submit() {
 }
 
 onMounted(async () => {
+  const shouldRefresh = consumeContractsRefresh()
   await load()
   if (ctx.selectedWorkstationId) {
     const exists = availableWorkstations.value.some(

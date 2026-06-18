@@ -4,7 +4,8 @@ const ctx = reactive({
   statusFilter: '',
   areaFilter: '',
   selectedWorkstationId: null,
-  needsRefresh: false,
+  workstationsNeedRefresh: false,
+  contractsNeedRefresh: false,
   lastSignedWorkstation: null
 })
 
@@ -22,13 +23,23 @@ export function useWorkstationContext() {
     ctx.selectedWorkstationId = null
   }
 
-  function markNeedsRefresh() {
-    ctx.needsRefresh = true
+  function markWorkstationsNeedRefresh() {
+    ctx.workstationsNeedRefresh = true
   }
 
-  function consumeRefresh() {
-    const val = ctx.needsRefresh
-    ctx.needsRefresh = false
+  function consumeWorkstationsRefresh() {
+    const val = ctx.workstationsNeedRefresh
+    ctx.workstationsNeedRefresh = false
+    return val
+  }
+
+  function markContractsNeedRefresh() {
+    ctx.contractsNeedRefresh = true
+  }
+
+  function consumeContractsRefresh() {
+    const val = ctx.contractsNeedRefresh
+    ctx.contractsNeedRefresh = false
     return val
   }
 
@@ -47,8 +58,10 @@ export function useWorkstationContext() {
     setFilters,
     selectForContract,
     clearSelection,
-    markNeedsRefresh,
-    consumeRefresh,
+    markWorkstationsNeedRefresh,
+    consumeWorkstationsRefresh,
+    markContractsNeedRefresh,
+    consumeContractsRefresh,
     setLastSignedWorkstation,
     consumeLastSigned
   }
