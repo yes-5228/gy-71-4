@@ -4,7 +4,7 @@
     <NavigationTabs v-model="activeView" :items="tabs" />
     <DashboardView v-if="activeView === 'dashboard'" @navigate="activeView = $event" />
     <WorkstationsView v-else-if="activeView === 'workstations'" @navigate="activeView = $event" />
-    <ContractsView v-else-if="activeView === 'contracts'" />
+    <ContractsView v-else-if="activeView === 'contracts'" @navigate="activeView = $event" />
     <PaymentsView v-else-if="activeView === 'payments'" />
     <RemindersView v-else />
   </main>

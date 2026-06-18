@@ -4,7 +4,8 @@ const ctx = reactive({
   statusFilter: '',
   areaFilter: '',
   selectedWorkstationId: null,
-  needsRefresh: false
+  needsRefresh: false,
+  lastSignedWorkstation: null
 })
 
 export function useWorkstationContext() {
@@ -31,12 +32,24 @@ export function useWorkstationContext() {
     return val
   }
 
+  function setLastSignedWorkstation(workstation) {
+    ctx.lastSignedWorkstation = workstation
+  }
+
+  function consumeLastSigned() {
+    const val = ctx.lastSignedWorkstation
+    ctx.lastSignedWorkstation = null
+    return val
+  }
+
   return {
     ctx,
     setFilters,
     selectForContract,
     clearSelection,
     markNeedsRefresh,
-    consumeRefresh
+    consumeRefresh,
+    setLastSignedWorkstation,
+    consumeLastSigned
   }
 }

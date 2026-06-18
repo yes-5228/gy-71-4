@@ -25,6 +25,18 @@
       <button type="submit">新增工位</button>
     </form>
 
+    <div v-if="successNotice" class="notice notice-success" role="alert">
+      <span>
+        🎉 工位 <strong>{{ successNotice.code || '#' + successNotice.id }}</strong>
+        <template v-if="successNotice.area">（{{ successNotice.area }}）</template>
+        已成功签约。
+        <template v-if="successNotice.outOfFilter">
+          由于工位状态已变更为"已租"，当前筛选条件下不再显示该工位。
+        </template>
+      </span>
+      <button type="button" class="notice-close" @click="successNotice = null">×</button>
+    </div>
+
     <p v-if="error" class="error">{{ error }}</p>
     <div class="table-wrap">
       <table>
@@ -74,12 +86,13 @@ import { useWorkstationContext } from '../utils/workspaceContext'
 
 const emit = defineEmits(['navigate'])
 
-const { ctx, setFilters, selectForContract, consumeRefresh } = useWorkstationContext()
+const { ctx, setFilters, selectForContract, consumeRefresh, consumeLastSigned } = useWorkstationContext()
 
 const statusFilter = ref(ctx.statusFilter)
 const areaFilter = ref(ctx.areaFilter)
 const workstations = ref([])
 const error = ref('')
+const successNotice = ref(null)
 const form = reactive({
   code: '',
   area: '',
@@ -118,6 +131,7 @@ async function load() {
 
 function onFilterChange() {
   setFilters(statusFilter.value, areaFilter.value)
+  successNotice.value = null
   load()
 }
 
@@ -138,11 +152,16 @@ async function submit() {
   }
 }
 
-onMounted(() => {
-  if (consumeRefresh()) {
-    load()
-  } else {
-    load()
+onMounted(async () => {
+  const lastSigned = consumeLastSigned()
+  const shouldRefresh = consumeRefresh()
+  await load()
+  if (lastSigned) {
+    const stillVisible = workstations.value.some((ws) => ws.id === lastSigned.id)
+    successNotice.value = {
+      ...lastSigned,
+      outOfFilter: !stillVisible
+    }
   }
 })
 </script>

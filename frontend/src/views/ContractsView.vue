@@ -64,7 +64,9 @@ import StatusBadge from '../components/StatusBadge.vue'
 import { currency, todayISO } from '../utils/formatters'
 import { useWorkstationContext } from '../utils/workspaceContext'
 
-const { ctx, clearSelection, markNeedsRefresh } = useWorkstationContext()
+const { ctx, clearSelection, markNeedsRefresh, setLastSignedWorkstation } = useWorkstationContext()
+
+const emit = defineEmits(['navigate'])
 
 const contracts = ref([])
 const availableWorkstations = ref([])
@@ -115,9 +117,16 @@ async function load() {
 async function submit() {
   error.value = ''
   try {
-    await createContract({ ...form, workstation_id: Number(form.workstation_id) })
+    const signedId = Number(form.workstation_id)
+    const signedItem = availableWorkstations.value.find((ws) => ws.id === signedId)
+    await createContract({ ...form, workstation_id: signedId })
     markNeedsRefresh()
     clearSelection()
+    if (signedItem) {
+      setLastSignedWorkstation({ id: signedItem.id, code: signedItem.code, area: signedItem.area })
+    } else {
+      setLastSignedWorkstation({ id: signedId })
+    }
     Object.assign(form, {
       tenant_name: '',
       tenant_contact: '',
@@ -127,7 +136,7 @@ async function submit() {
       monthly_rent: 0,
       deposit: 0
     })
-    await load()
+    emit('navigate', 'workstations')
   } catch (err) {
     error.value = err.message
   }
