@@ -145,16 +145,24 @@ function onFilterChange() {
   load()
 }
 
-function switchToLeased() {
+async function switchToLeased() {
   statusFilter.value = 'leased'
   setFilters(statusFilter.value, areaFilter.value)
-  load()
+  await load()
+  if (successNotice.value) {
+    const stillVisible = workstations.value.some((ws) => ws.id === successNotice.value.id)
+    successNotice.value = { ...successNotice.value, outOfFilter: !stillVisible }
+  }
 }
 
-function switchToAll() {
+async function switchToAll() {
   statusFilter.value = ''
   setFilters(statusFilter.value, areaFilter.value)
-  load()
+  await load()
+  if (successNotice.value) {
+    const stillVisible = workstations.value.some((ws) => ws.id === successNotice.value.id)
+    successNotice.value = { ...successNotice.value, outOfFilter: !stillVisible }
+  }
 }
 
 function goContract(workstationId) {
